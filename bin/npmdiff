@@ -1,0 +1,118 @@
+#!/usr/bin/env node
+
+var program = require('commander');
+var colors = require('ansicolors');
+var styles = require('ansistyles');
+var table = require('text-table');
+var semver = require('semver');
+var version = require('../package.json').version;
+var npmdiff = require('../');
+
+program
+  .version(version)
+  .usage('[options] <pkg> <version> [<version>] [--] [<path>]')
+  .option('--stat', 'generate a diffstat')
+  .option('--deps', 'check for dependent packages')
+  .option('--no-color', 'turn off colored diff')
+  .parse(process.argv);
+
+var args = program.args;
+if (args.length < 2) {
+  console.log(program.usage());
+  process.exit();
+}
+
+var pkg = args[0];
+var verA = args[1];
+var verB = args[2];
+var path = args[3];
+if (args.length === 3 && process.argv.indexOf('--') >= 0) {
+  path = verB;
+  verB = null;
+}
+verB = verB || '*';
+
+if (!semver.validRange(verA) || !semver.validRange(verB)) {
+  console.log(program.usage());
+  process.exit();
+}
+
+if (program.stat) {
+  stat();
+} else if (program.deps) {
+  deps();
+} else {
+  default_();
+}
+
+function default_() {
+  var diff = npmdiff(pkg, verA, verB, {path: path})
+    .on('error', function(err) {
+      throw err;
+    });
+  if (program.color) {
+    diff = diff.pipe(new npmdiff.ColorDiff());
+  }
+  diff.pipe(process.stdout);
+}
+
+function stat() {
+  var stat = npmdiff.stat(pkg, verA, verB, {path: path})
+    .on('error', function(err) {
+      throw err;
+    })
+  if (program.color) {
+    stat = stat.pipe(new npmdiff.ColorStat());
+  }
+  stat.pipe(process.stdout);
+}
+
+function deps() {
+  npmdiff.deps(pkg, verA, verB, function(err, diff, dataA, dataB) {
+    if (err) throw err;
+
+    var colorMap = [
+      colors.cyan,
+      colors.red,
+      colors.green,
+      colors.brightBlack
+    ];
+
+    var data = [['Package', dataA.version, dataB.version, 'Location'].map(function(s) {
+      return styles.underline(s);
+    })];
+
+    data = data.concat(diff.map(function(row) {
+      return row.map(function(v, i) {
+        switch (i) {
+        case 1:
+        case 2:
+          v = v || 'MISSING';
+          break;
+        case 3:
+          v.shift();
+          v = v.join(' > ');
+          break;
+        }
+
+        if (program.color) {
+          var color = colorMap[i];
+          v = color ? color(v) : v;
+        }
+        return v;
+      });
+    }));
+
+    var opts = {
+      align: ['l', 'r', 'r', 'l'],
+      stringLength: function(s) { return ansiTrim(s).length }
+    };
+    console.log(table(data, opts));
+  });
+}
+
+function ansiTrim(s) {
+  var r = new RegExp('\x1b(?:\\[(?:\\d+[ABCDEFGJKSTm]|\\d+;\\d+[Hfm]|' +
+        '\\d+;\\d+;\\d+m|6n|s|u|\\?25[lh])|\\w)', 'g');
+  return s.replace(r, '');
+}

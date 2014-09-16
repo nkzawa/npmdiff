@@ -1,0 +1,10 @@
+{
+  "name": "bar",
+  "version": "0.1.1",
+  "dependencies": {
+    "baz": "0.0.1"
+  },
+  "dist": {
+    "tarball": "http://localhost/bar/-/bar-0.1.1.tgz"
+  }
+}
