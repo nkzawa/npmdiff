@@ -1,4 +1,7 @@
 language: node_js
+install:
+  - sudo apt-get install diffstat
+  - npm install
 node_js:
   - 0.10
   - 0.11
