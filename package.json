@@ -26,8 +26,8 @@
     "commander": "~2.3.0",
     "minimatch": "~1.0.0",
     "mktmpdir": "~0.1.1",
-    "npm-registry-client": "~3.2.1",
-    "npmconf": "~2.0.9",
+    "npm-registry-client": "~3.2.2",
+    "npmconf": "~2.1.0",
     "semver": "~3.0.1",
     "tar": "~1.0.1",
     "text-table": "~0.2.0"
