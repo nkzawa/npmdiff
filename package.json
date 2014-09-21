@@ -1,6 +1,6 @@
 {
   "name": "npmdiff",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Show changes between versions of a npm package",
   "author": "Naoyuki Kanezawa <naoyuki.kanezawa@gmail.com>",
   "keywords": [
