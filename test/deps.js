@@ -8,7 +8,7 @@ describe('npmdiff.dpes', function() {
   });
 
   it('should get deps', function(done) {
-    npmdiff.deps('foo', '1.0.0', '1.0.1', {registry: this.registry}, function(err, data) {
+    npmdiff.deps('foo', '1.0.0', '1.0.1', { registry: this.registry }, function(err, data) {
       expect(err).not.to.be.ok();
       expect(data).to.eql([
         ['bar', '0.1.0', '0.1.1', ['foo']],
